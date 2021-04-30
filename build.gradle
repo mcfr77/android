@@ -322,7 +322,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'com.vanniktech:emoji-google:0.7.0'
 
-    implementation 'com.github.cotechde.hwsecurity:hwsecurity-fido:4.1.0'
+    implementation 'com.github.cotechde.hwsecurity:hwsecurity-fido:4.4.0'
     implementation 'com.github.cotechde.hwsecurity:hwsecurity-fido2:4.1.0'
 
     spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.11.0'
