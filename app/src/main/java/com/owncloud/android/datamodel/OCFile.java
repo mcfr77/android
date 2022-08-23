@@ -953,7 +953,7 @@ public class OCFile implements Parcelable, Comparable<OCFile>, ServerFileInterfa
         this.lockToken = lockToken;
     }
 
-    public void setImageDimension(@NonNull ImageDimension imageDimension) {
+    public void setImageDimension(@Nullable ImageDimension imageDimension) {
         this.imageDimension = imageDimension;
     }
 

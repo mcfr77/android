@@ -21,6 +21,4 @@
  */
 package com.owncloud.android.datamodel
 
-import java.io.Serializable
-
-data class ImageDimension(var width: Float = -1f, var height: Float = -1f) : Serializable
+data class ImageDimension(var width: Float = -1f, var height: Float = -1f)
