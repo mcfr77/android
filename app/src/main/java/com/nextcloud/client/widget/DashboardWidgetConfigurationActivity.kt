@@ -48,7 +48,7 @@ import javax.inject.Inject
 
 class DashboardWidgetConfigurationActivity : AppCompatActivity(), DashboardWidgetConfigurationInterface, Injectable,
     AccountChooserInterface {
-    private lateinit var adapter: DashboardWidgetListAdapter
+    private lateinit var mAdapter: DashboardWidgetListAdapter
     private lateinit var binding: DashboardWidgetConfigurationLayoutBinding
 
     @Inject
@@ -73,10 +73,10 @@ class DashboardWidgetConfigurationActivity : AppCompatActivity(), DashboardWidge
         setContentView(binding.root)
 
         val layoutManager = LinearLayoutManager(this)
-        adapter = DashboardWidgetListAdapter(themeDrawableUtils, accountManager, clientFactory, this, this)
+        mAdapter = DashboardWidgetListAdapter(themeDrawableUtils, accountManager, clientFactory, this, this)
         binding.list.apply {
             setHasFooter(false)
-            setAdapter(adapter)
+            setAdapter(mAdapter)
             setLayoutManager(layoutManager)
             setEmptyView(binding.emptyView.emptyListView)
         }
@@ -120,7 +120,7 @@ class DashboardWidgetConfigurationActivity : AppCompatActivity(), DashboardWidge
                 val result = DashboardListWidgetsRemoteOperation().execute(client)
 
                 withContext(Dispatchers.Main) {
-                    adapter.setWidgetList(result.resultData)
+                    mAdapter.setWidgetList(result.resultData)
                 }
             } catch (e: Exception) {
                 Log_OC.e(this, "Error loading widgets for user $user", e)
