@@ -22,22 +22,27 @@
 
 package com.nextcloud.client.widget
 
+import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.animation.GlideAnimation
+import com.bumptech.glide.request.target.SimpleTarget
 import com.nextcloud.android.lib.resources.dashboard.DashboardGetWidgetItemsRemoteOperation
 import com.nextcloud.android.lib.resources.dashboard.DashboardWidgetItem
 import com.nextcloud.client.account.UserAccountManager
 import com.nextcloud.client.network.ClientFactory
+import com.nextcloud.client.preferences.AppPreferences
 import com.owncloud.android.R
 import com.owncloud.android.lib.common.utils.Log_OC
 import dagger.android.AndroidInjection
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import java.text.DateFormat
-import java.util.Date
 import java.util.Random
 import javax.inject.Inject
 
@@ -48,13 +53,22 @@ class DashboardWidgetService : RemoteViewsService() {
     @Inject
     lateinit var clientFactory: ClientFactory
 
+    @Inject
+    lateinit var appPreferences: AppPreferences
+
     override fun onCreate() {
         super.onCreate()
         AndroidInjection.inject(this)
     }
 
     override fun onGetViewFactory(intent: Intent): RemoteViewsFactory {
-        return StackRemoteViewsFactory(this.applicationContext, userAccountManager, clientFactory, intent)
+        return StackRemoteViewsFactory(
+            this.applicationContext,
+            userAccountManager,
+            clientFactory,
+            intent,
+            appPreferences
+        )
     }
 }
 
@@ -64,32 +78,34 @@ class StackRemoteViewsFactory(
     private val context: Context,
     val userAccountManager: UserAccountManager,
     val clientFactory: ClientFactory,
-    val intent: Intent
+    val intent: Intent,
+    val appPreferences: AppPreferences
 ) : RemoteViewsService.RemoteViewsFactory {
 
+    private lateinit var widgetConfiguration: WidgetConfiguration
     private lateinit var widgetItems: List<DashboardWidgetItem>
 
     override fun onCreate() {
-        Log_OC.d("WidgetService", "onCreate")
+        Log_OC.d(this, "onCreate")
+        val appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1)
 
-        widgetItems = List(REMOTE_VIEW_COUNT) { index ->
-            DashboardWidgetItem(
-                "$index!", "Subline: " + DateFormat.getTimeInstance(
-                    DateFormat.SHORT
-                ).format(Date()), "", ""
-            )
+        widgetConfiguration = appPreferences.getWidget(appWidgetId)
+
+        if (!widgetConfiguration.user.isPresent) {
+            // TODO show error
+            Log_OC.e(this, "No user found!")
         }
+
+        //widgetApp = "recommendations" // TODO change me
+
+        widgetItems = emptyList()
     }
 
     override fun onDataSetChanged() {
-        widgetItems = randomList()
-
-        runBlocking {
-            launch {
-                val client = clientFactory.createNextcloudClient(userAccountManager.user)
-                val result = DashboardGetWidgetItemsRemoteOperation("recommendations").execute(client)
-                widgetItems = result.resultData["recommendations"] ?: emptyList()
-            }
+        CoroutineScope(Dispatchers.IO).launch {
+            val client = clientFactory.createNextcloudClient(widgetConfiguration.user.get())
+            val result = DashboardGetWidgetItemsRemoteOperation(widgetConfiguration.widgetId).execute(client)
+            widgetItems = result.resultData[widgetConfiguration.widgetId] ?: emptyList()
         }
 
         Log_OC.d("WidgetService", "onDataSetChanged")
@@ -109,9 +125,42 @@ class StackRemoteViewsFactory(
         return RemoteViews(context.packageName, R.layout.widget_item).apply {
             val widgetItem = widgetItems[position]
 
-            // icon
-            if (widgetItem.iconUrl != null) {
+            val target1: SimpleTarget<Bitmap> = object : SimpleTarget<Bitmap>() {
+                override fun onResourceReady(resource: Bitmap?, glideAnimation: GlideAnimation<in Bitmap>?) {
+                    // setImageViewResource(R.id.icon, resource)
+                    setImageViewBitmap(R.id.icon, resource)
+                    // imageView.setImageDrawable(resource)
+                }
+            }
 
+            // icon
+            if (widgetItem.iconUrl.isNotEmpty()) {
+                val test = Glide.with(context)
+                    .load("https://www.creavea.com/produits/82320-l/image-3d-divers-zen-n2-30-x-30-cm-l.jpg")
+                    .asBitmap()
+                    .into(256, 256)
+
+                setImageViewBitmap(R.id.icon, test.get())
+
+                // Glide.with(context)
+                //     .load(widgetItem.iconUrl)
+                //     .asBitmap()
+                //     .diskCacheStrategy(DiskCacheStrategy.ALL)
+                //     .into(target1)
+
+                //
+                // Glide.with(context)
+                //     .using(CustomGlideStreamLoader(widgetConfiguration.user.get(), clientFactory))
+                //     .load(widgetItem.iconUrl)
+                //     .asBitmap()
+                //     .placeholder(R.id.icon)
+                //     .error(R.id.icon)
+                //     //.diskCacheStrategy(DiskCacheStrategy.NONE)
+                //     //.skipMemoryCache(true)
+                //     .crossFade()
+                //
+                //    
+                //     //.into(target1)
             }
             // if (widgetItem.userName != null) {
             //     val avatarRadius: Float = context.resources.getDimension(R.dimen.widget_avatar_icon_radius)

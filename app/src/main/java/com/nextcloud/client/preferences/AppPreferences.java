@@ -20,6 +20,9 @@
 
 package com.nextcloud.client.preferences;
 
+import com.nextcloud.android.lib.resources.dashboard.DashboardWidget;
+import com.nextcloud.client.account.User;
+import com.nextcloud.client.widget.WidgetConfiguration;
 import com.owncloud.android.datamodel.OCFile;
 import com.owncloud.android.utils.FileSortOrder;
 
@@ -377,4 +380,10 @@ public interface AppPreferences {
     boolean isStoragePermissionRequested();
 
     void setStoragePermissionRequested(boolean value);
+
+    void saveWidget(int widgetId, DashboardWidget widget, User user);
+
+    void deleteWidget(int widgetId);
+
+    WidgetConfiguration getWidget(int widgetId);
 }

@@ -22,102 +22,118 @@
 
 package com.nextcloud.client.widget
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.widget.RemoteViews
-import android.widget.Toast
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.model.StreamEncoder
+import com.bumptech.glide.load.resource.file.FileToStreamDecoder
+import com.bumptech.glide.request.target.AppWidgetTarget
+import com.nextcloud.client.preferences.AppPreferences
+import com.nextcloud.client.preferences.AppPreferencesImpl
 import com.owncloud.android.R
+import com.owncloud.android.utils.svg.SVGorImage
+import com.owncloud.android.utils.svg.SvgOrImageBitmapTranscoder
+import com.owncloud.android.utils.svg.SvgOrImageDecoder
+import java.io.InputStream
 
 /**
- * Implementation of App Widget functionality.
+ * Manages widgets
  */
 class DashboardWidgetProvider : AppWidgetProvider() {
-    val TOAST_ACTION = "com.example.android.stackwidget.TOAST_ACTION"
-    val EXTRA_ITEM = "com.example.android.stackwidget.EXTRA_ITEM"
+    private lateinit var appPreferences: AppPreferences
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
-        // There may be multiple widgets active, so update all of them
+        appPreferences = AppPreferencesImpl.fromContext(context)
+
         for (appWidgetId in appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId)
-        }
-    }
-
-    override fun onEnabled(context: Context) {
-        // Enter relevant functionality for when the first widget is created
-    }
-
-    override fun onDisabled(context: Context) {
-        // Enter relevant functionality for when the last widget is disabled
-    }
-
-    override fun onReceive(context: Context?, intent: Intent) {
-        val mgr = AppWidgetManager.getInstance(context)
-        if (intent.action == TOAST_ACTION) {
-            val appWidgetId = intent.getIntExtra(
-                AppWidgetManager.EXTRA_APPWIDGET_ID,
-                AppWidgetManager.INVALID_APPWIDGET_ID
+            val widgetConfiguration = appPreferences.getWidget(appWidgetId)
+            updateAppWidget(
+                context,
+                appWidgetManager,
+                appWidgetId,
+                widgetConfiguration.title,
+                widgetConfiguration.iconUrl
             )
-            val viewIndex = intent.getIntExtra(EXTRA_ITEM, 0)
-            Toast.makeText(context, "Touched view $viewIndex", Toast.LENGTH_SHORT).show()
         }
-
-
-        super.onReceive(context, intent)
-    }
-}
-
-internal fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
-    // Set up the intent that starts the StackViewService, which will
-    // provide the views for this collection.
-    val intent = Intent(context, DashboardWidgetService::class.java).apply {
-        // Add the widget ID to the intent extras.
-        putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
-        data = Uri.parse(toUri(Intent.URI_INTENT_SCHEME))
     }
 
-    // Construct the RemoteViews object
-    val views = RemoteViews(context.packageName, R.layout.dashboard_widget).apply {
-        // Set up the RemoteViews object to use a RemoteViews adapter.
-        // This adapter connects to a RemoteViewsService through the
-        // specified intent.
-        // This is how you populate the data.
-        setRemoteAdapter(R.id.list, intent)
+    override fun onDeleted(context: Context?, appWidgetIds: IntArray) {
+        appPreferences = AppPreferencesImpl.fromContext(context)
 
-        // The empty view is displayed when the collection has no items.
-        // It should be in the same layout used to instantiate the
-        // RemoteViews object.
-        setEmptyView(R.id.list, R.id.empty_view)
-
-        setTextViewText(R.id.title, "Talk mentions")
-
-        //Create an Intent with the AppWidgetManager.ACTION_APPWIDGET_UPDATE action//
-        val intentUpdate = Intent(context, DashboardWidgetProvider::class.java)
-        intentUpdate.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-
-        //Update the current widget instance only, by creating an array that contains the widget’s unique ID// 
-        val idArray = intArrayOf(appWidgetId)
-        intentUpdate.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, idArray)
-
-        setOnClickPendingIntent(
-            R.id.reload,
-            PendingIntent.getBroadcast(context, appWidgetId, intentUpdate, PendingIntent.FLAG_UPDATE_CURRENT)
-        )
-
-        val clickPI = PendingIntent.getActivity(
-            context, 0,
-            Intent(), PendingIntent.FLAG_UPDATE_CURRENT
-        )
-
-        setPendingIntentTemplate(R.id.list, clickPI)
+        for (appWidgetId in appWidgetIds) {
+            appPreferences.deleteWidget(appWidgetId)
+        }
     }
 
-    // Instruct the widget manager to update the widget
-    appWidgetManager.updateAppWidget(appWidgetId, views)
-    appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.list)
+    companion object {
+        @SuppressLint("UnspecifiedImmutableFlag")
+        internal fun updateAppWidget(
+            context: Context,
+            appWidgetManager: AppWidgetManager,
+            appWidgetId: Int,
+            title: String,
+            iconUrl: String
+        ) {
+            val intent = Intent(context, DashboardWidgetService::class.java).apply {
+                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                data = Uri.parse(toUri(Intent.URI_INTENT_SCHEME))
+            }
 
-    Toast.makeText(context, "Widget has been updated: $appWidgetId", Toast.LENGTH_SHORT).show()
+            val views = RemoteViews(context.packageName, R.layout.dashboard_widget).apply {
+                setRemoteAdapter(R.id.list, intent)
+
+                setEmptyView(R.id.list, R.id.empty_view)
+
+                setTextViewText(R.id.title, title)
+
+                val intentUpdate = Intent(context, DashboardWidgetProvider::class.java)
+                intentUpdate.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+
+                val idArray = intArrayOf(appWidgetId)
+                intentUpdate.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, idArray)
+
+                setOnClickPendingIntent(
+                    R.id.reload,
+                    PendingIntent.getBroadcast(context, appWidgetId, intentUpdate, PendingIntent.FLAG_UPDATE_CURRENT)
+                )
+
+                val clickPI = PendingIntent.getActivity(
+                    context,
+                    0,
+                    Intent(),
+                    PendingIntent.FLAG_UPDATE_CURRENT
+                )
+
+                setPendingIntentTemplate(R.id.list, clickPI)
+
+                val appWidgetTarget = AppWidgetTarget(context, this, R.id.icon, appWidgetId)
+
+                Glide.with(context)
+                    .using(
+                        Glide.buildStreamModelLoader(Uri::class.java, context),
+                        InputStream::class.java
+                    )
+                    .from(Uri::class.java)
+                    .`as`(SVGorImage::class.java)
+                    .transcode(SvgOrImageBitmapTranscoder(128, 128), Bitmap::class.java)
+                    .sourceEncoder(StreamEncoder())
+                    .cacheDecoder(FileToStreamDecoder(SvgOrImageDecoder()))
+                    .decoder(SvgOrImageDecoder())
+                    .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                    .load(Uri.parse(iconUrl))
+                    .into(appWidgetTarget)
+            }
+
+            appWidgetManager.updateAppWidget(appWidgetId, views)
+            appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.list)
+        }
+    }
 }

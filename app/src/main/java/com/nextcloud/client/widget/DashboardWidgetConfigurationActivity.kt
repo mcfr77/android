@@ -22,6 +22,7 @@
 package com.nextcloud.client.widget
 
 import android.appwidget.AppWidgetManager
+import android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_ID
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -33,6 +34,7 @@ import com.nextcloud.client.account.User
 import com.nextcloud.client.account.UserAccountManager
 import com.nextcloud.client.di.Injectable
 import com.nextcloud.client.network.ClientFactory
+import com.nextcloud.client.preferences.AppPreferences
 import com.owncloud.android.R
 import com.owncloud.android.databinding.DashboardWidgetConfigurationLayoutBinding
 import com.owncloud.android.lib.common.utils.Log_OC
@@ -50,6 +52,7 @@ class DashboardWidgetConfigurationActivity : AppCompatActivity(), DashboardWidge
     AccountChooserInterface {
     private lateinit var mAdapter: DashboardWidgetListAdapter
     private lateinit var binding: DashboardWidgetConfigurationLayoutBinding
+    private lateinit var currentUser: User
 
     @Inject
     lateinit var themeDrawableUtils: ThemeDrawableUtils
@@ -59,6 +62,9 @@ class DashboardWidgetConfigurationActivity : AppCompatActivity(), DashboardWidge
 
     @Inject
     lateinit var clientFactory: ClientFactory
+
+    @Inject
+    lateinit var appPreferences: AppPreferences
 
     var appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
 
@@ -81,7 +87,8 @@ class DashboardWidgetConfigurationActivity : AppCompatActivity(), DashboardWidge
             setEmptyView(binding.emptyView.emptyListView)
         }
 
-        if (accountManager.allUsers.size > 2) {
+        currentUser = accountManager.user
+        if (accountManager.allUsers.size > 1) {
             // show dropdown
             binding.account.apply {
                 visibility = View.VISIBLE
@@ -90,9 +97,8 @@ class DashboardWidgetConfigurationActivity : AppCompatActivity(), DashboardWidge
                     dialog.show(supportFragmentManager, null)
                 }
             }
-        } else {
-            loadWidgets(accountManager.user)
         }
+        loadWidgets(currentUser)
 
         binding.close.setOnClickListener { finish() }
 
@@ -126,6 +132,8 @@ class DashboardWidgetConfigurationActivity : AppCompatActivity(), DashboardWidge
                 Log_OC.e(this, "Error loading widgets for user $user", e)
 
                 withContext(Dispatchers.Main) {
+                    binding.emptyView.root.visibility = View.VISIBLE
+
                     binding.emptyView.emptyListIcon.apply {
                         setImageResource(R.drawable.ic_list_empty_error)
                         visibility = View.VISIBLE
@@ -147,20 +155,28 @@ class DashboardWidgetConfigurationActivity : AppCompatActivity(), DashboardWidge
     }
 
     override fun onItemClicked(dashboardWidget: DashboardWidget) {
-        // ListSharedPrefsUtil.saveWidgetLayoutIdPref(this, appWidgetId, widgetLayoutResId)
+        appPreferences.saveWidget(appWidgetId, dashboardWidget, currentUser)
 
-        // It is the responsibility of the configuration activity to update the app widget
+        // update widget
         val appWidgetManager = AppWidgetManager.getInstance(this)
-        // ListAppWidget.updateAppWidget(this, appWidgetManager, appWidgetId)
+        DashboardWidgetProvider.updateAppWidget(
+            this,
+            appWidgetManager,
+            appWidgetId,
+            dashboardWidget.title,
+            dashboardWidget.iconUrl
+        )
 
-        // Make sure we pass back the original appWidgetId
-        val resultValue = Intent()
-        resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+        val resultValue = Intent().apply {
+            putExtra(EXTRA_APPWIDGET_ID, appWidgetId)
+        }
+
         setResult(RESULT_OK, resultValue)
         finish()
     }
 
     override fun onAccountChosen(user: User) {
+        currentUser = user
         loadWidgets(user)
     }
 }
