@@ -250,7 +250,7 @@
         <service
             android:name="com.nextcloud.client.widget.DashboardWidgetService"
             android:permission="android.permission.BIND_REMOTEVIEWS"
-            android:exported="false" />
+            android:exported="true" />
 
         <provider
             android:name=".providers.FileContentProvider"

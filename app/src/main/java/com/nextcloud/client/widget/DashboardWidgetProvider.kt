@@ -30,12 +30,14 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
+import android.view.View
 import android.widget.RemoteViews
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.model.StreamEncoder
 import com.bumptech.glide.load.resource.file.FileToStreamDecoder
 import com.bumptech.glide.request.target.AppWidgetTarget
+import com.nextcloud.android.lib.resources.dashboard.DashboardButton
 import com.nextcloud.client.preferences.AppPreferences
 import com.nextcloud.client.preferences.AppPreferencesImpl
 import com.owncloud.android.R
@@ -60,8 +62,20 @@ class DashboardWidgetProvider : AppWidgetProvider() {
                 appWidgetManager,
                 appWidgetId,
                 widgetConfiguration.title,
-                widgetConfiguration.iconUrl
+                widgetConfiguration.iconUrl,
+                widgetConfiguration.addButton,
+                widgetConfiguration.moreButton
             )
+        }
+    }
+
+    override fun onReceive(context: Context?, intent: Intent?) {
+        super.onReceive(context, intent)
+
+        if (intent?.action == OPEN_INTENT) {
+            val clickIntent = Intent(Intent.ACTION_VIEW, intent.data)
+            clickIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context?.startActivity(clickIntent)
         }
     }
 
@@ -74,13 +88,17 @@ class DashboardWidgetProvider : AppWidgetProvider() {
     }
 
     companion object {
+        const val OPEN_INTENT = "open"
+
         @SuppressLint("UnspecifiedImmutableFlag")
         internal fun updateAppWidget(
             context: Context,
             appWidgetManager: AppWidgetManager,
             appWidgetId: Int,
             title: String,
-            iconUrl: String
+            iconUrl: String,
+            moreButton: DashboardButton?,
+            addButton: DashboardButton?
         ) {
             val intent = Intent(context, DashboardWidgetService::class.java).apply {
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
@@ -93,6 +111,23 @@ class DashboardWidgetProvider : AppWidgetProvider() {
                 setEmptyView(R.id.list, R.id.empty_view)
 
                 setTextViewText(R.id.title, title)
+
+                // create add button
+                if (addButton == null) {
+                    setViewVisibility(R.id.create, View.GONE)
+                } else {
+                    setViewVisibility(R.id.create, View.VISIBLE)
+                    setContentDescription(R.id.create, addButton.text)
+
+                    val clickIntent = Intent(context, DashboardWidgetProvider::class.java)
+                    clickIntent.action = OPEN_INTENT
+                    clickIntent.data = Uri.parse(addButton.link)
+
+                    setOnClickPendingIntent(
+                        R.id.create,
+                        PendingIntent.getBroadcast(context, appWidgetId, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+                    )
+                }
 
                 val intentUpdate = Intent(context, DashboardWidgetProvider::class.java)
                 intentUpdate.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE

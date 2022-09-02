@@ -22,6 +22,7 @@
 
 package com.nextcloud.client.widget
 
+import com.nextcloud.android.lib.resources.dashboard.DashboardButton
 import com.nextcloud.client.account.User
 import com.nextcloud.java.util.Optional
 
@@ -29,5 +30,7 @@ data class WidgetConfiguration(
     val widgetId: String,
     val title: String,
     val iconUrl: String,
-    val user: Optional<User>
+    val user: Optional<User>,
+    val addButton: DashboardButton?,
+    val moreButton: DashboardButton?
 )

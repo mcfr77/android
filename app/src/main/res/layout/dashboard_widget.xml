@@ -59,6 +59,16 @@
             android:textStyle="bold" />
 
         <ImageView
+            android:id="@+id/create"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="0"
+            android:contentDescription="@string/create_new"
+            android:layout_marginEnd="@dimen/standard_margin"
+            android:src="@drawable/ic_plus" />
+
+        <ImageView
             android:id="@+id/reload"
             android:layout_width="24dp"
             android:layout_height="24dp"
@@ -71,10 +81,14 @@
     <ListView
         android:id="@+id/list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:divider="@null"
         android:paddingStart="@dimen/standard_margin"
-        android:paddingEnd="@dimen/standard_margin" />
+        android:paddingEnd="@dimen/zero">
+
+
+    </ListView>
 
     <LinearLayout
         android:id="@+id/empty_view"
@@ -84,6 +98,7 @@
         android:layout_margin="@dimen/standard_half_margin"
         android:gravity="center_horizontal"
         android:orientation="vertical"
+        android:visibility="gone"
         android:paddingTop="@dimen/standard_margin">
 
         <ImageView
@@ -119,4 +134,11 @@
             android:text="Check back later or reload." />
     </LinearLayout>
 
+    <Button
+        android:id="@+id/button"
+
+        android:layout_width="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
 </LinearLayout>

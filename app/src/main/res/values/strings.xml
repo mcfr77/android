@@ -1049,4 +1049,7 @@
     <string name="icon_of_widget_entry">Icon of widget entry</string>
     <string name="choose_widget">Choose widget</string>
     <string name="reload">Reload</string>
+    <string name="change_account">Change account</string>
+    <string name="widgets_not_available"><![CDATA[Widgets are only available on >= NC25]]></string>
+    <string name="widgets_not_available_title">Not available</string>
 </resources>

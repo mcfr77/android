@@ -25,6 +25,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.nextcloud.android.lib.resources.dashboard.DashBoardButtonType;
+import com.nextcloud.android.lib.resources.dashboard.DashboardButton;
 import com.nextcloud.android.lib.resources.dashboard.DashboardWidget;
 import com.nextcloud.client.account.User;
 import com.nextcloud.client.account.UserAccountManager;
@@ -105,6 +107,12 @@ public final class AppPreferencesImpl implements AppPreferences {
     private static final String PREF__WIDGET_ID = "widget_id_";
     private static final String PREF__WIDGET_ICON = "widget_icon_";
     private static final String PREF__WIDGET_USER = "widget_user_";
+    private static final String PREF__WIDGET_ADD_BUTTON_TEXT = "widget_add_button_text_";
+    private static final String PREF__WIDGET_ADD_BUTTON_URL = "widget_add_button_url_";
+    private static final String PREF__WIDGET_ADD_BUTTON_TYPE = "widget_add_button_type_";
+    private static final String PREF__WIDGET_MORE_BUTTON_TEXT = "widget_more_button_text_";
+    private static final String PREF__WIDGET_MORE_BUTTON_URL = "widget_more_button_url_";
+    private static final String PREF__WIDGET_MORE_BUTTON_TYPE = "widget_more_button_type_";
 
     private final Context context;
     private final SharedPreferences preferences;
@@ -716,13 +724,33 @@ public final class AppPreferencesImpl implements AppPreferences {
 
     @Override
     public void saveWidget(int widgetId, DashboardWidget widget, User user) {
-        preferences
+        SharedPreferences.Editor editor = preferences
             .edit()
             .putString(PREF__WIDGET_ID + widgetId, widget.getId())
             .putString(PREF__WIDGET_TITLE + widgetId, widget.getTitle())
             .putString(PREF__WIDGET_ICON + widgetId, widget.getIconUrl())
-            .putString(PREF__WIDGET_USER + widgetId, user.getAccountName())
-            .apply();
+            .putString(PREF__WIDGET_USER + widgetId, user.getAccountName());
+
+
+        if (widget.getButtons() != null && widget.getButtons().size() > 0) {
+            for (DashboardButton button : widget.getButtons()) {
+                if (button.getType() == DashBoardButtonType.NEW) {
+                    editor
+                        .putString(PREF__WIDGET_ADD_BUTTON_TYPE + widgetId, button.getType().toString())
+                        .putString(PREF__WIDGET_ADD_BUTTON_URL + widgetId, button.getLink())
+                        .putString(PREF__WIDGET_ADD_BUTTON_TEXT + widgetId, button.getText());
+                }
+
+                if (button.getType() == DashBoardButtonType.MORE) {
+                    editor
+                        .putString(PREF__WIDGET_MORE_BUTTON_TYPE + widgetId, button.getType().toString())
+                        .putString(PREF__WIDGET_MORE_BUTTON_URL + widgetId, button.getLink())
+                        .putString(PREF__WIDGET_MORE_BUTTON_TEXT + widgetId, button.getText());
+                }
+            }
+        }
+
+        editor.apply();
     }
 
     @Override
@@ -733,6 +761,12 @@ public final class AppPreferencesImpl implements AppPreferences {
             .remove(PREF__WIDGET_TITLE + widgetId)
             .remove(PREF__WIDGET_ICON + widgetId)
             .remove(PREF__WIDGET_USER + widgetId)
+            .remove(PREF__WIDGET_ADD_BUTTON_TEXT + widgetId)
+            .remove(PREF__WIDGET_ADD_BUTTON_URL + widgetId)
+            .remove(PREF__WIDGET_ADD_BUTTON_TYPE + widgetId)
+            .remove(PREF__WIDGET_MORE_BUTTON_TEXT + widgetId)
+            .remove(PREF__WIDGET_MORE_BUTTON_URL + widgetId)
+            .remove(PREF__WIDGET_MORE_BUTTON_TYPE + widgetId)
             .apply();
     }
 
@@ -740,10 +774,28 @@ public final class AppPreferencesImpl implements AppPreferences {
     public WidgetConfiguration getWidget(int widgetId) {
         Optional<User> userOptional = userAccountManager.getUser(preferences.getString(PREF__WIDGET_USER + widgetId, ""));
 
+        DashboardButton addButton = null;
+        if (preferences.contains(PREF__WIDGET_ADD_BUTTON_TYPE + widgetId)) {
+            addButton = new DashboardButton(
+                DashBoardButtonType.valueOf(preferences.getString(PREF__WIDGET_ADD_BUTTON_TYPE + widgetId, "")),
+                preferences.getString(PREF__WIDGET_ADD_BUTTON_TEXT + widgetId, ""),
+                preferences.getString(PREF__WIDGET_ADD_BUTTON_URL + widgetId, ""));
+        }
+        DashboardButton moreButton = null;
+        if (preferences.contains(PREF__WIDGET_MORE_BUTTON_TYPE + widgetId)) {
+            moreButton = new DashboardButton(
+                DashBoardButtonType.valueOf(preferences.getString(PREF__WIDGET_MORE_BUTTON_TYPE + widgetId, "")),
+                preferences.getString(PREF__WIDGET_MORE_BUTTON_TEXT + widgetId, ""),
+                preferences.getString(PREF__WIDGET_MORE_BUTTON_URL + widgetId, ""));
+        }
+
         return new WidgetConfiguration(preferences.getString(PREF__WIDGET_ID + widgetId, ""),
                                        preferences.getString(PREF__WIDGET_TITLE + widgetId, ""),
                                        preferences.getString(PREF__WIDGET_ICON + widgetId, ""),
-                                       userOptional);
+                                       userOptional,
+                                       addButton,
+                                       moreButton
+        );
     }
 
     @VisibleForTesting

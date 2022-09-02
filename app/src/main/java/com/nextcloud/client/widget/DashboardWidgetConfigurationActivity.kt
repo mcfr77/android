@@ -27,7 +27,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.nextcloud.android.lib.resources.dashboard.DashBoardButtonType
 import com.nextcloud.android.lib.resources.dashboard.DashboardListWidgetsRemoteOperation
 import com.nextcloud.android.lib.resources.dashboard.DashboardWidget
 import com.nextcloud.client.account.User
@@ -37,6 +39,7 @@ import com.nextcloud.client.network.ClientFactory
 import com.nextcloud.client.preferences.AppPreferences
 import com.owncloud.android.R
 import com.owncloud.android.databinding.DashboardWidgetConfigurationLayoutBinding
+import com.owncloud.android.lib.common.operations.RemoteOperationResult
 import com.owncloud.android.lib.common.utils.Log_OC
 import com.owncloud.android.ui.adapter.DashboardWidgetListAdapter
 import com.owncloud.android.ui.dialog.AccountChooserInterface
@@ -89,11 +92,23 @@ class DashboardWidgetConfigurationActivity : AppCompatActivity(), DashboardWidge
 
         currentUser = accountManager.user
         if (accountManager.allUsers.size > 1) {
-            // show dropdown
-            binding.account.apply {
+            binding.accountName.apply {
+                setCompoundDrawablesWithIntrinsicBounds(
+                    null,
+                    null,
+                    themeDrawableUtils.tintDrawable(
+                        AppCompatResources.getDrawable(
+                            context,
+                            R.drawable.ic_baseline_arrow_drop_down_24
+                        ), R.color.black
+                    ),
+                    null
+                )
                 visibility = View.VISIBLE
+                text = currentUser.accountName
                 setOnClickListener {
                     val dialog = MultipleAccountsDialog()
+                    dialog.highlightCurrentlyActiveAccount = false
                     dialog.show(supportFragmentManager, null)
                 }
             }
@@ -121,17 +136,41 @@ class DashboardWidgetConfigurationActivity : AppCompatActivity(), DashboardWidge
                 binding.emptyView.root.visibility = View.GONE
             }
 
+            withContext(Dispatchers.Main) {
+                if (accountManager.allUsers.size > 1) {
+                    binding.accountName.text = user.accountName
+                }
+            }
+
             try {
                 val client = clientFactory.createNextcloudClient(user)
                 val result = DashboardListWidgetsRemoteOperation().execute(client)
 
                 withContext(Dispatchers.Main) {
-                    mAdapter.setWidgetList(result.resultData)
+                    if (result.code == RemoteOperationResult.ResultCode.FILE_NOT_FOUND) {
+                        withContext(Dispatchers.Main) {
+                            mAdapter.setWidgetList(null)
+                            binding.emptyView.root.visibility = View.VISIBLE
+                            binding.emptyView.emptyListViewHeadline.setText(R.string.widgets_not_available_title)
+
+                            binding.emptyView.emptyListIcon.apply {
+                                setImageResource(R.drawable.ic_list_empty_error)
+                                visibility = View.VISIBLE
+                            }
+                            binding.emptyView.emptyListViewText.apply {
+                                setText(R.string.widgets_not_available)
+                                visibility = View.VISIBLE
+                            }
+                        }
+                    } else {
+                        mAdapter.setWidgetList(result.resultData)
+                    }
                 }
             } catch (e: Exception) {
                 Log_OC.e(this, "Error loading widgets for user $user", e)
 
                 withContext(Dispatchers.Main) {
+                    mAdapter.setWidgetList(null)
                     binding.emptyView.root.visibility = View.VISIBLE
 
                     binding.emptyView.emptyListIcon.apply {
@@ -159,12 +198,15 @@ class DashboardWidgetConfigurationActivity : AppCompatActivity(), DashboardWidge
 
         // update widget
         val appWidgetManager = AppWidgetManager.getInstance(this)
+
         DashboardWidgetProvider.updateAppWidget(
             this,
             appWidgetManager,
             appWidgetId,
             dashboardWidget.title,
-            dashboardWidget.iconUrl
+            dashboardWidget.iconUrl,
+            dashboardWidget.buttons?.find { it.type == DashBoardButtonType.MORE },
+            dashboardWidget.buttons?.find { it.type == DashBoardButtonType.NEW }
         )
 
         val resultValue = Intent().apply {

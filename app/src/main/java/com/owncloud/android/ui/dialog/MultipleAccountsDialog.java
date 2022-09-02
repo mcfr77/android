@@ -60,6 +60,7 @@ public class MultipleAccountsDialog extends DialogFragment implements Injectable
     @Inject UserAccountManager accountManager;
     @Inject ThemeColorUtils themeColorUtils;
     @Inject ThemeDrawableUtils themeDrawableUtils;
+    public boolean highlightCurrentlyActiveAccount = true;
 
     @NonNull
     @Override
@@ -81,6 +82,7 @@ public class MultipleAccountsDialog extends DialogFragment implements Injectable
                                                       getAccountListItems(),
                                                       this,
                                                       false,
+                                                      highlightCurrentlyActiveAccount,
                                                       false,
                                                       themeColorUtils,
                                                       themeDrawableUtils);

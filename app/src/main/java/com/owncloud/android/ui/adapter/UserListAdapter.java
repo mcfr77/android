@@ -69,6 +69,7 @@ public class UserListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private final ClickListener clickListener;
     private final boolean showAddAccount;
     private final boolean showDotsMenu;
+    private boolean highlightCurrentlyActiveAccount;
     private final ThemeColorUtils themeColorUtils;
     private final ThemeDrawableUtils themeDrawableUtils;
 
@@ -78,6 +79,7 @@ public class UserListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                            ClickListener clickListener,
                            boolean showAddAccount,
                            boolean showDotsMenu,
+                           boolean highlightCurrentlyActiveAccount,
                            ThemeColorUtils themeColorUtils,
                            ThemeDrawableUtils themeDrawableUtils) {
         this.context = context;
@@ -92,6 +94,7 @@ public class UserListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         this.showDotsMenu = showDotsMenu;
         this.themeColorUtils = themeColorUtils;
         this.themeDrawableUtils = themeDrawableUtils;
+        this.highlightCurrentlyActiveAccount = highlightCurrentlyActiveAccount;
     }
 
     @Override
@@ -125,7 +128,7 @@ public class UserListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             if (UserListItem.TYPE_ACCOUNT == userListItem.getType()) {
                 final User user = userListItem.getUser();
                 AccountViewHolderItem item = (AccountViewHolderItem) holder;
-                item.bind(user, userListItem.isEnabled(), this);
+                item.bind(user, userListItem.isEnabled(), highlightCurrentlyActiveAccount, this);
             } // create add account action item
             else if (UserListItem.TYPE_ACTION_ADD == userListItem.getType() && accountListAdapterListener != null) {
                 ((AddAccountViewHolderItem) holder).bind(accountListAdapterListener);
@@ -228,12 +231,19 @@ public class UserListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             }
         }
 
-        public void bind(User user, boolean userListItemEnabled, DisplayUtils.AvatarGenerationListener avatarGenerationListener) {
+        public void bind(User user,
+                         boolean userListItemEnabled,
+                         boolean highlightCurrentlyActiveAccount,
+                         DisplayUtils.AvatarGenerationListener avatarGenerationListener) {
             setData(user);
             setUser(user);
             setUsername(user);
             setAvatar(user, avatarGenerationListener);
-            setCurrentlyActiveState(user);
+            if (highlightCurrentlyActiveAccount) {
+                setCurrentlyActiveState(user);
+            } else {
+                binding.ticker.setVisibility(View.INVISIBLE);
+            }
 
             if (!userListItemEnabled) {
                 binding.userName.setPaintFlags(binding.userName.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
