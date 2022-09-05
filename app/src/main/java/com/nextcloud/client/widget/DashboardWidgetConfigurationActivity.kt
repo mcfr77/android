@@ -82,6 +82,7 @@ class DashboardWidgetConfigurationActivity : AppCompatActivity(), DashboardWidge
         setContentView(binding.root)
 
         val layoutManager = LinearLayoutManager(this)
+        // TODO follow our new architecture
         mAdapter = DashboardWidgetListAdapter(themeDrawableUtils, accountManager, clientFactory, this, this)
         binding.list.apply {
             setHasFooter(false)
