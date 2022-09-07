@@ -24,7 +24,7 @@
     android:description="@string/app_widget_description"
     android:initialKeyguardLayout="@layout/dashboard_widget"
     android:initialLayout="@layout/dashboard_widget"
-    android:minWidth="180dp"
+    android:minWidth="270dp"
     android:minHeight="180dp"
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="1800000"
