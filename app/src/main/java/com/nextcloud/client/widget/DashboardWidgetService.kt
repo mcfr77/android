@@ -147,7 +147,7 @@ class StackRemoteViewsFactory(
                     try {
                         setImageViewBitmap(R.id.icon, test.get())
                     } catch (e: Exception) {
-                        Log_OC.e(this, "Error setting icon", e)
+                        Log_OC.d(this, "Error setting icon", e)
                         setImageViewResource(R.id.icon, R.drawable.ic_dashboard)
                     }
                 }

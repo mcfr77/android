@@ -203,6 +203,8 @@ class DashboardWidgetConfigurationActivity : AppCompatActivity(), DashboardWidge
         DashboardWidgetProvider.updateAppWidget(
             this,
             appWidgetManager,
+            clientFactory,
+            accountManager,
             appWidgetId,
             dashboardWidget.title,
             dashboardWidget.iconUrl,

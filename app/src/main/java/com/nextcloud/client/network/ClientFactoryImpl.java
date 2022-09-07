@@ -37,11 +37,11 @@ import com.owncloud.android.lib.common.accounts.AccountUtils;
 
 import java.io.IOException;
 
-class ClientFactoryImpl implements ClientFactory {
+public class ClientFactoryImpl implements ClientFactory {
 
     private Context context;
 
-    ClientFactoryImpl(Context context) {
+    public ClientFactoryImpl(Context context) {
         this.context = context;
     }
 

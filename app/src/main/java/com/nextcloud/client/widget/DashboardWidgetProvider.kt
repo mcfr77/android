@@ -36,11 +36,18 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.model.StreamEncoder
 import com.bumptech.glide.load.resource.file.FileToStreamDecoder
+import com.bumptech.glide.request.animation.GlideAnimation
 import com.bumptech.glide.request.target.AppWidgetTarget
 import com.nextcloud.android.lib.resources.dashboard.DashboardButton
+import com.nextcloud.client.account.CurrentAccountProvider
+import com.nextcloud.client.account.UserAccountManagerImpl
+import com.nextcloud.client.network.ClientFactory
+import com.nextcloud.client.network.ClientFactoryImpl
 import com.nextcloud.client.preferences.AppPreferences
 import com.nextcloud.client.preferences.AppPreferencesImpl
 import com.owncloud.android.R
+import com.owncloud.android.utils.BitmapUtils
+import com.owncloud.android.utils.glide.CustomGlideUriLoader
 import com.owncloud.android.utils.svg.SVGorImage
 import com.owncloud.android.utils.svg.SvgOrImageBitmapTranscoder
 import com.owncloud.android.utils.svg.SvgOrImageDecoder
@@ -51,15 +58,21 @@ import java.io.InputStream
  */
 class DashboardWidgetProvider : AppWidgetProvider() {
     private lateinit var appPreferences: AppPreferences
+    private lateinit var clientFactory: ClientFactory
+    private lateinit var accountProvider: CurrentAccountProvider
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
         appPreferences = AppPreferencesImpl.fromContext(context)
+        clientFactory = ClientFactoryImpl(context)
+        accountProvider = UserAccountManagerImpl.fromContext(context)
 
         for (appWidgetId in appWidgetIds) {
             val widgetConfiguration = appPreferences.getWidget(appWidgetId)
             updateAppWidget(
                 context,
                 appWidgetManager,
+                clientFactory,
+                accountProvider,
                 appWidgetId,
                 widgetConfiguration.title,
                 widgetConfiguration.iconUrl,
@@ -94,6 +107,8 @@ class DashboardWidgetProvider : AppWidgetProvider() {
         internal fun updateAppWidget(
             context: Context,
             appWidgetManager: AppWidgetManager,
+            clientFactory: ClientFactory,
+            accountProvider: CurrentAccountProvider,
             appWidgetId: Int,
             title: String,
             iconUrl: String,
@@ -149,11 +164,18 @@ class DashboardWidgetProvider : AppWidgetProvider() {
 
                 setPendingIntentTemplate(R.id.list, clickPI)
 
-                val appWidgetTarget = AppWidgetTarget(context, this, R.id.icon, appWidgetId)
+                val test = object : AppWidgetTarget(context, this, R.id.icon, appWidgetId) {
+                    override fun onResourceReady(resource: Bitmap?, glideAnimation: GlideAnimation<in Bitmap>?) {
+                        if (resource != null) {
+                            val tintedBitmap = BitmapUtils.tintImage(resource, R.color.black)
+                            super.onResourceReady(tintedBitmap, glideAnimation)
+                        }
+                    }
+                }
 
                 Glide.with(context)
                     .using(
-                        Glide.buildStreamModelLoader(Uri::class.java, context),
+                        CustomGlideUriLoader(accountProvider.getUser(), clientFactory),
                         InputStream::class.java
                     )
                     .from(Uri::class.java)
@@ -164,7 +186,7 @@ class DashboardWidgetProvider : AppWidgetProvider() {
                     .decoder(SvgOrImageDecoder())
                     .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                     .load(Uri.parse(iconUrl))
-                    .into(appWidgetTarget)
+                    .into(test)
             }
 
             appWidgetManager.updateAppWidget(appWidgetId, views)
