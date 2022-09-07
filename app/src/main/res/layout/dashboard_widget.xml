@@ -34,10 +34,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingStart="@dimen/standard_margin"
-        android:paddingTop="@dimen/standard_margin"
-        android:paddingEnd="@dimen/standard_margin"
-        android:paddingBottom="@dimen/standard_margin"
+        android:layout_marginStart="@dimen/standard_margin"
+        android:layout_marginTop="@dimen/standard_margin"
+        android:layout_marginEnd="@dimen/standard_margin"
+        android:layout_marginBottom="@dimen/standard_margin"
         tools:ignore="UseCompoundDrawables">
 
         <ImageView
@@ -84,11 +84,8 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:divider="@null"
-        android:paddingStart="@dimen/standard_margin"
-        android:paddingEnd="@dimen/zero">
-
-
-    </ListView>
+        android:layout_marginStart="@dimen/standard_margin"
+        android:layout_marginEnd="@dimen/zero"></ListView>
 
     <LinearLayout
         android:id="@+id/empty_view"
