@@ -25,11 +25,15 @@ package com.nextcloud.client.widget
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.model.StreamEncoder
+import com.bumptech.glide.load.resource.file.FileToStreamDecoder
 import com.nextcloud.android.lib.resources.dashboard.DashboardGetWidgetItemsRemoteOperation
 import com.nextcloud.android.lib.resources.dashboard.DashboardWidgetItem
 import com.nextcloud.client.account.UserAccountManager
@@ -38,10 +42,15 @@ import com.nextcloud.client.preferences.AppPreferences
 import com.owncloud.android.R
 import com.owncloud.android.lib.common.utils.Log_OC
 import com.owncloud.android.utils.glide.CustomGlideStreamLoader
+import com.owncloud.android.utils.glide.CustomGlideUriLoader
+import com.owncloud.android.utils.svg.SVGorImage
+import com.owncloud.android.utils.svg.SvgOrImageBitmapTranscoder
+import com.owncloud.android.utils.svg.SvgOrImageDecoder
 import dagger.android.AndroidInjection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.InputStream
 import javax.inject.Inject
 
 class DashboardWidgetService : RemoteViewsService() {
@@ -137,18 +146,51 @@ class StackRemoteViewsFactory(
             return RemoteViews(context.packageName, R.layout.widget_item).apply {
                 val widgetItem = widgetItems[position]
 
-                // icon
+                // icon bitmap/svg
                 if (widgetItem.iconUrl.isNotEmpty()) {
-                    val test = Glide.with(context)
-                        .using(CustomGlideStreamLoader(widgetConfiguration.user.get(), clientFactory))
-                        .load(widgetItem.iconUrl)
-                        .asBitmap()
-                        .into(256, 256)
-                    try {
-                        setImageViewBitmap(R.id.icon, test.get())
-                    } catch (e: Exception) {
-                        Log_OC.d(this, "Error setting icon", e)
-                        setImageViewResource(R.id.icon, R.drawable.ic_dashboard)
+                    if (Uri.parse(widgetItem.iconUrl).encodedPath!!.endsWith(".svg")) {
+                        // val test = object : AppWidgetTarget(context, this, R.id.icon, appWidgetId) {
+                        //     override fun onResourceReady(resource: Bitmap?, glideAnimation: GlideAnimation<in Bitmap>?) {
+                        //         if (resource != null) {
+                        //             val tintedBitmap = BitmapUtils.tintImage(resource, R.color.black)
+                        //             super.onResourceReady(tintedBitmap, glideAnimation)
+                        //         }
+                        //     }
+                        // }
+
+                        val glide = Glide.with(context)
+                            .using(
+                                CustomGlideUriLoader(userAccountManager.user, clientFactory),
+                                InputStream::class.java
+                            )
+                            .from(Uri::class.java)
+                            .`as`(SVGorImage::class.java)
+                            .transcode(SvgOrImageBitmapTranscoder(128, 128), Bitmap::class.java)
+                            .sourceEncoder(StreamEncoder())
+                            .cacheDecoder(FileToStreamDecoder(SvgOrImageDecoder()))
+                            .decoder(SvgOrImageDecoder())
+                            .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                            .load(Uri.parse(widgetItem.iconUrl))
+                            .into(512, 512)
+
+                        try {
+                            setImageViewBitmap(R.id.icon, glide.get())
+                        } catch (e: Exception) {
+                            Log_OC.d(this, "Error setting icon", e)
+                            setImageViewResource(R.id.icon, R.drawable.ic_dashboard)
+                        }
+                    } else {
+                        val glide = Glide.with(context)
+                            .using(CustomGlideStreamLoader(widgetConfiguration.user.get(), clientFactory))
+                            .load(widgetItem.iconUrl)
+                            .asBitmap()
+                            .into(256, 256)
+                        try {
+                            setImageViewBitmap(R.id.icon, glide.get())
+                        } catch (e: Exception) {
+                            Log_OC.d(this, "Error setting icon", e)
+                            setImageViewResource(R.id.icon, R.drawable.ic_dashboard)
+                        }
                     }
                 }
                 // if (widgetItem.userName != null) {
