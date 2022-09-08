@@ -51,7 +51,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class DashboardWidgetConfigurationActivity : AppCompatActivity(), DashboardWidgetConfigurationInterface, Injectable,
+class DashboardWidgetConfigurationActivity :
+    AppCompatActivity(),
+    DashboardWidgetConfigurationInterface,
+    Injectable,
     AccountChooserInterface {
     private lateinit var mAdapter: DashboardWidgetListAdapter
     private lateinit var binding: DashboardWidgetConfigurationLayoutBinding
@@ -101,7 +104,8 @@ class DashboardWidgetConfigurationActivity : AppCompatActivity(), DashboardWidge
                         AppCompatResources.getDrawable(
                             context,
                             R.drawable.ic_baseline_arrow_drop_down_24
-                        ), R.color.black
+                        ),
+                        R.color.black
                     ),
                     null
                 )
