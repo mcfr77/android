@@ -41,6 +41,7 @@ import com.nextcloud.client.network.ClientFactory
 import com.nextcloud.client.preferences.AppPreferences
 import com.owncloud.android.R
 import com.owncloud.android.lib.common.utils.Log_OC
+import com.owncloud.android.utils.BitmapUtils
 import com.owncloud.android.utils.glide.CustomGlideStreamLoader
 import com.owncloud.android.utils.glide.CustomGlideUriLoader
 import com.owncloud.android.utils.svg.SVGorImage
@@ -89,7 +90,7 @@ class StackRemoteViewsFactory(
 
     private lateinit var widgetConfiguration: WidgetConfiguration
     private var widgetItems: List<DashboardWidgetItem> = emptyList()
-    private var hasLoadMore = true
+    private var hasLoadMore = false
 
     override fun onCreate() {
         Log_OC.d(this, "onCreate")
@@ -102,8 +103,6 @@ class StackRemoteViewsFactory(
             Log_OC.e(this, "No user found!")
         }
 
-        hasLoadMore = widgetConfiguration.moreButton != null
-
         onDataSetChanged()
     }
 
@@ -113,6 +112,8 @@ class StackRemoteViewsFactory(
                 val client = clientFactory.createNextcloudClient(widgetConfiguration.user.get())
                 val result = DashboardGetWidgetItemsRemoteOperation(widgetConfiguration.widgetId).execute(client)
                 widgetItems = result.resultData[widgetConfiguration.widgetId] ?: emptyList()
+
+                hasLoadMore = widgetConfiguration.moreButton != null && widgetItems.size == 14
             } catch (e: Exception) {
                 Log_OC.e(this, "Error updating widget", e)
             }
@@ -149,15 +150,6 @@ class StackRemoteViewsFactory(
                 // icon bitmap/svg
                 if (widgetItem.iconUrl.isNotEmpty()) {
                     if (Uri.parse(widgetItem.iconUrl).encodedPath!!.endsWith(".svg")) {
-                        // val test = object : AppWidgetTarget(context, this, R.id.icon, appWidgetId) {
-                        //     override fun onResourceReady(resource: Bitmap?, glideAnimation: GlideAnimation<in Bitmap>?) {
-                        //         if (resource != null) {
-                        //             val tintedBitmap = BitmapUtils.tintImage(resource, R.color.black)
-                        //             super.onResourceReady(tintedBitmap, glideAnimation)
-                        //         }
-                        //     }
-                        // }
-
                         val glide = Glide.with(context)
                             .using(
                                 CustomGlideUriLoader(userAccountManager.user, clientFactory),
@@ -174,7 +166,12 @@ class StackRemoteViewsFactory(
                             .into(512, 512)
 
                         try {
-                            setImageViewBitmap(R.id.icon, glide.get())
+                            if (widgetConfiguration.roundIcon || true) {
+                                val x = BitmapUtils.bitmapToCircularBitmapDrawable(context.resources, glide.get())
+                                setImageViewBitmap(R.id.icon, x.bitmap)
+                            } else {
+                                setImageViewBitmap(R.id.icon, glide.get())
+                            }
                         } catch (e: Exception) {
                             Log_OC.d(this, "Error setting icon", e)
                             setImageViewResource(R.id.icon, R.drawable.ic_dashboard)

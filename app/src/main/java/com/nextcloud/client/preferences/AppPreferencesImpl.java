@@ -106,6 +106,7 @@ public final class AppPreferencesImpl implements AppPreferences {
 
     private static final String PREF__WIDGET_ID = "widget_id_";
     private static final String PREF__WIDGET_ICON = "widget_icon_";
+    private static final String PREF__WIDGET_ROUND_ICON = "widget_round_icon_";
     private static final String PREF__WIDGET_USER = "widget_user_";
     private static final String PREF__WIDGET_ADD_BUTTON_TEXT = "widget_add_button_text_";
     private static final String PREF__WIDGET_ADD_BUTTON_URL = "widget_add_button_url_";
@@ -729,6 +730,7 @@ public final class AppPreferencesImpl implements AppPreferences {
             .putString(PREF__WIDGET_ID + widgetId, widget.getId())
             .putString(PREF__WIDGET_TITLE + widgetId, widget.getTitle())
             .putString(PREF__WIDGET_ICON + widgetId, widget.getIconUrl())
+            .putBoolean(PREF__WIDGET_ROUND_ICON + widget, widget.getRoundIcons())
             .putString(PREF__WIDGET_USER + widgetId, user.getAccountName());
 
 
@@ -760,6 +762,7 @@ public final class AppPreferencesImpl implements AppPreferences {
             .remove(PREF__WIDGET_ID + widgetId)
             .remove(PREF__WIDGET_TITLE + widgetId)
             .remove(PREF__WIDGET_ICON + widgetId)
+            .remove(PREF__WIDGET_ROUND_ICON + widgetId)
             .remove(PREF__WIDGET_USER + widgetId)
             .remove(PREF__WIDGET_ADD_BUTTON_TEXT + widgetId)
             .remove(PREF__WIDGET_ADD_BUTTON_URL + widgetId)
@@ -792,6 +795,7 @@ public final class AppPreferencesImpl implements AppPreferences {
         return new WidgetConfiguration(preferences.getString(PREF__WIDGET_ID + widgetId, ""),
                                        preferences.getString(PREF__WIDGET_TITLE + widgetId, ""),
                                        preferences.getString(PREF__WIDGET_ICON + widgetId, ""),
+                                       preferences.getBoolean(PREF__WIDGET_ROUND_ICON + widgetId, false),
                                        userOptional,
                                        addButton,
                                        moreButton
