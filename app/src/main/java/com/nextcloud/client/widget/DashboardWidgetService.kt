@@ -34,6 +34,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.model.StreamEncoder
 import com.bumptech.glide.load.resource.file.FileToStreamDecoder
+import com.bumptech.glide.request.FutureTarget
 import com.nextcloud.android.lib.resources.dashboard.DashboardGetWidgetItemsRemoteOperation
 import com.nextcloud.android.lib.resources.dashboard.DashboardWidgetItem
 import com.nextcloud.client.account.UserAccountManager
@@ -149,8 +150,9 @@ class StackRemoteViewsFactory(
 
                 // icon bitmap/svg
                 if (widgetItem.iconUrl.isNotEmpty()) {
+                    val glide: FutureTarget<Bitmap>
                     if (Uri.parse(widgetItem.iconUrl).encodedPath!!.endsWith(".svg")) {
-                        val glide = Glide.with(context)
+                        glide = Glide.with(context)
                             .using(
                                 CustomGlideUriLoader(userAccountManager.user, clientFactory),
                                 InputStream::class.java
@@ -164,48 +166,25 @@ class StackRemoteViewsFactory(
                             .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                             .load(Uri.parse(widgetItem.iconUrl))
                             .into(512, 512)
-
-                        try {
-                            if (widgetConfiguration.roundIcon || true) {
-                                val x = BitmapUtils.bitmapToCircularBitmapDrawable(context.resources, glide.get())
-                                setImageViewBitmap(R.id.icon, x.bitmap)
-                            } else {
-                                setImageViewBitmap(R.id.icon, glide.get())
-                            }
-                        } catch (e: Exception) {
-                            Log_OC.d(this, "Error setting icon", e)
-                            setImageViewResource(R.id.icon, R.drawable.ic_dashboard)
-                        }
                     } else {
-                        val glide = Glide.with(context)
+                        glide = Glide.with(context)
                             .using(CustomGlideStreamLoader(widgetConfiguration.user.get(), clientFactory))
                             .load(widgetItem.iconUrl)
                             .asBitmap()
                             .into(256, 256)
-                        try {
+                    }
+
+                    try {
+                        if (widgetConfiguration.roundIcon) {
+                            setImageViewBitmap(R.id.icon, BitmapUtils.roundBitmap(glide.get()))
+                        } else {
                             setImageViewBitmap(R.id.icon, glide.get())
-                        } catch (e: Exception) {
-                            Log_OC.d(this, "Error setting icon", e)
-                            setImageViewResource(R.id.icon, R.drawable.ic_dashboard)
                         }
+                    } catch (e: Exception) {
+                        Log_OC.d(this, "Error setting icon", e)
+                        setImageViewResource(R.id.icon, R.drawable.ic_dashboard)
                     }
                 }
-                // if (widgetItem.userName != null) {
-                //     val avatarRadius: Float = context.resources.getDimension(R.dimen.widget_avatar_icon_radius)
-                //     val avatarBitmap =
-                //         BitmapUtils.drawableToBitmap(TextDrawable.createNamedAvatar(widgetItem.userName, avatarRadius))
-                //
-                //     // val avatar = BitmapUtils.createAvatarWithStatus(
-                //     //     avatarBitmap,
-                //     //     widgetItem.statusType,
-                //     //     widgetItem.icon ?: "",
-                //     //     context
-                //     // )
-                //
-                //     setImageViewBitmap(R.id.icon, avatarBitmap)
-                // } else {
-                //     setImageViewResource(R.id.icon, R.drawable.ic_group)
-                // }
 
                 // text
                 setTextViewText(R.id.title, widgetItem.title)
