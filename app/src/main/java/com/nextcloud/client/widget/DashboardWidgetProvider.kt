@@ -76,8 +76,7 @@ class DashboardWidgetProvider : AppWidgetProvider() {
                 appWidgetId,
                 widgetConfiguration.title,
                 widgetConfiguration.iconUrl,
-                widgetConfiguration.addButton,
-                widgetConfiguration.moreButton
+                widgetConfiguration.addButton
             )
         }
     }
@@ -112,7 +111,6 @@ class DashboardWidgetProvider : AppWidgetProvider() {
             appWidgetId: Int,
             title: String,
             iconUrl: String,
-            moreButton: DashboardButton?,
             addButton: DashboardButton?
         ) {
             val intent = Intent(context, DashboardWidgetService::class.java).apply {

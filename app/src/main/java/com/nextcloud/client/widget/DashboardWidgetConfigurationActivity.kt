@@ -212,7 +212,6 @@ class DashboardWidgetConfigurationActivity :
             appWidgetId,
             dashboardWidget.title,
             dashboardWidget.iconUrl,
-            dashboardWidget.buttons?.find { it.type == DashBoardButtonType.MORE },
             dashboardWidget.buttons?.find { it.type == DashBoardButtonType.NEW }
         )
 
