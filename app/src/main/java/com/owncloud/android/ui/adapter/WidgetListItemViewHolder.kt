@@ -23,7 +23,6 @@
 package com.owncloud.android.ui.adapter
 
 import android.content.Context
-import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
 import androidx.recyclerview.widget.RecyclerView
@@ -54,10 +53,8 @@ class WidgetListItemViewHolder(
 
         val target = object : SimpleTarget<Drawable>() {
             override fun onResourceReady(resource: Drawable?, glideAnimation: GlideAnimation<in Drawable>?) {
-                // binding.icon.setImageDrawable(themeDrawableUtils.tintDrawable(resource, R.color.black))
-
                 binding.icon.setImageDrawable(resource)
-                binding.icon.setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_IN)
+                binding.icon.setColorFilter(context.getColor(R.color.dark), PorterDuff.Mode.SRC_ATOP)
             }
 
             override fun onLoadFailed(e: java.lang.Exception?, errorDrawable: Drawable?) {

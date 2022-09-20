@@ -84,6 +84,8 @@ class DashboardWidgetConfigurationActivity :
         binding = DashboardWidgetConfigurationLayoutBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        themeDrawableUtils.tintDrawable(binding.icon.drawable, getColor(R.color.dark))
+
         val layoutManager = LinearLayoutManager(this)
         // TODO follow our new architecture
         mAdapter = DashboardWidgetListAdapter(themeDrawableUtils, accountManager, clientFactory, this, this)
