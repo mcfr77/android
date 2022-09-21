@@ -23,18 +23,27 @@
 package com.nextcloud.ui
 
 import android.graphics.BitmapFactory
+import android.graphics.PorterDuff
+import android.graphics.drawable.Drawable
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.test.espresso.intent.rule.IntentsTestRule
+import com.bumptech.glide.request.animation.GlideAnimation
+import com.bumptech.glide.request.target.SimpleTarget
 import com.nextcloud.client.TestActivity
-import com.owncloud.android.AbstractIT
+import com.nextcloud.client.account.UserAccountManager
+import com.nextcloud.client.account.UserAccountManagerImpl
+import com.nextcloud.client.network.ClientFactory
+import com.nextcloud.client.network.ClientFactoryImpl
+import com.owncloud.android.AbstractOnServerIT
 import com.owncloud.android.R
 import com.owncloud.android.utils.BitmapUtils
+import com.owncloud.android.utils.DisplayUtils
 import com.owncloud.android.utils.ScreenshotTest
 import org.junit.Rule
 import org.junit.Test
 
-class BitmapIT : AbstractIT() {
+class BitmapIT : AbstractOnServerIT() {
     @get:Rule
     val testActivityRule = IntentsTestRule(TestActivity::class.java, true, false)
 
@@ -63,5 +72,79 @@ class BitmapIT : AbstractIT() {
         activity.addView(linearLayout)
 
         screenshot(activity)
+    }
+
+    @Test
+    @ScreenshotTest
+    fun glideSVG() {
+        val activity = testActivityRule.launchActivity(null)
+        val accountProvider = UserAccountManagerImpl.fromContext(activity)
+        val clientFactory = ClientFactoryImpl(activity)
+
+        val linearLayout = LinearLayout(activity).apply {
+            orientation = LinearLayout.VERTICAL
+            setBackgroundColor(context.getColor(R.color.grey_200))
+        }
+
+        val file = getFile("christine.jpg")
+        val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+
+        ImageView(activity).apply {
+            setImageBitmap(bitmap)
+            linearLayout.addView(this, 50, 50)
+        }
+
+        downloadIcon(
+            client.baseUri.toString() + "/apps/files/img/app.svg",
+            activity,
+            linearLayout,
+            accountProvider,
+            clientFactory
+        )
+
+        downloadIcon(
+            client.baseUri.toString() + "/core/img/actions/group.svg",
+            activity,
+            linearLayout,
+            accountProvider,
+            clientFactory
+        )
+
+        activity.addView(linearLayout)
+
+        longSleep()
+
+        screenshot(activity)
+    }
+
+    private fun downloadIcon(
+        url: String,
+        activity: TestActivity,
+        linearLayout: LinearLayout,
+        accountProvider: UserAccountManager,
+        clientFactory: ClientFactory
+    ) {
+        val view = ImageView(activity).apply {
+            linearLayout.addView(this, 50, 50)
+        }
+        val target = object : SimpleTarget<Drawable>() {
+            override fun onResourceReady(resource: Drawable?, glideAnimation: GlideAnimation<in Drawable>?) {
+                view.setColorFilter(targetContext.getColor(R.color.dark), PorterDuff.Mode.SRC_ATOP)
+                view.setImageDrawable(resource)
+            }
+        }
+
+        testActivityRule.runOnUiThread {
+            DisplayUtils.downloadIcon(
+                accountProvider,
+                clientFactory,
+                activity,
+                url,
+                target,
+                R.drawable.ic_user,
+                50,
+                50
+            )
+        }
     }
 }
