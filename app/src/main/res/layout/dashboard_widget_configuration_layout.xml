@@ -41,7 +41,7 @@
             app:srcCompat="@drawable/ic_dashboard" />
 
         <TextView
-            android:id="@+id/title"
+            android:id="@+id/chooseWidget"
             android:layout_width="0dp"
             android:layout_height="32dp"
             android:layout_weight="1"
@@ -52,7 +52,8 @@
         <TextView
             android:id="@+id/accountName"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="32dp"
+            android:gravity="center_vertical"
             android:visibility="gone" />
     </LinearLayout>
 

@@ -98,6 +98,8 @@ class DashboardWidgetConfigurationActivity :
 
         currentUser = accountManager.user
         if (accountManager.allUsers.size > 1) {
+            binding.chooseWidget.visibility = View.GONE
+
             binding.accountName.apply {
                 setCompoundDrawablesWithIntrinsicBounds(
                     null,
