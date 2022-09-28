@@ -43,7 +43,6 @@ import android.os.Environment;
 import android.os.StatFs;
 import android.provider.MediaStore;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 
@@ -56,6 +55,7 @@ import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
 import com.owncloud.android.datamodel.FileDataStorageManager;
 import com.owncloud.android.datamodel.OCFile;
+import com.owncloud.android.files.FileMenuFilter;
 import com.owncloud.android.files.StreamMediaFileOperation;
 import com.owncloud.android.files.services.FileDownloader.FileDownloaderBinder;
 import com.owncloud.android.files.services.FileUploader.FileUploaderBinder;
@@ -82,7 +82,6 @@ import com.owncloud.android.ui.events.FavoriteEvent;
 import com.owncloud.android.ui.events.FileLockEvent;
 import com.owncloud.android.ui.events.SyncEventFinished;
 import com.owncloud.android.utils.DisplayUtils;
-import com.owncloud.android.utils.EditorUtils;
 import com.owncloud.android.utils.FileStorageUtils;
 import com.owncloud.android.utils.PermissionUtil;
 import com.owncloud.android.utils.UriUtils;
@@ -277,7 +276,7 @@ public class FileOperationsHelper {
                     try {
                         Thread.sleep(3000);
                     } catch (InterruptedException e) {
-                        Log.e(TAG, "Failed to sleep for a bit");
+                        Log_OC.e(TAG, "Failed to sleep for a bit");
                     }
                 }
             }
@@ -303,9 +302,9 @@ public class FileOperationsHelper {
             if (launchables.isEmpty()) {
                 Optional<User> optionalUser = fileActivity.getUser();
 
-                if (optionalUser.isPresent() && EditorUtils.isEditorAvailable(fileActivity.getContentResolver(),
-                                                                              optionalUser.get(),
-                                                                              file.getMimeType())) {
+                if (optionalUser.isPresent() && FileMenuFilter.isEditorAvailable(fileActivity.getContentResolver(),
+                                                                                 optionalUser.get(),
+                                                                                 file.getMimeType())) {
                     openFileWithTextEditor(file, fileActivity);
                 } else {
                     Account account = fileActivity.getAccount();
@@ -356,7 +355,7 @@ public class FileOperationsHelper {
                                     try {
                                         Thread.sleep(3000);
                                     } catch (InterruptedException e) {
-                                        Log.e(TAG, "Failed to sleep");
+                                        Log_OC.e(TAG, "Failed to sleep");
                                     }
                                 }
 

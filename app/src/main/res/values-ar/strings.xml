@@ -241,7 +241,6 @@
     <string name="end_to_end_encryption_folder_not_empty">هذا المجلد غير فارغ.</string>
     <string name="end_to_end_encryption_generating_keys">جار توليد مفاتيح جديدة…</string>
     <string name="end_to_end_encryption_keywords_description">12 كلمة سويةً تكون رقم سري قوّي جداً، تجعلك أنت فقط ترى وتستخدم ملفاتك المشفرة. أرجو كتابتها والإحتفاظ بها في مكانٍّ آمن.</string>
-    <string name="end_to_end_encryption_not_enabled">التشفير من طرف إلى طرف آخر معطل من الخادم.</string>
     <string name="end_to_end_encryption_passphrase_title">إحفظ الـ12 كلمة السرية للتشفير</string>
     <string name="end_to_end_encryption_password">كلمة السر…</string>
     <string name="end_to_end_encryption_retrieving_keys">جارٍ جلب المفاتيح…</string>
@@ -320,6 +319,8 @@
     <string name="file_list_seconds_ago">منذ ثواني</string>
     <string name="file_management_permission">التصريح مطلوب</string>
     <string name="file_management_permission_optional">تصريحات التخزين</string>
+    <string name="file_management_permission_optional_text">%1$s يعمل بشكل أفضل مع أذونات الوصول إلى التخزين. يمكنك اختيار الوصول الكامل إلى جميع الملفات، أو الوصول للقراءة فقط إلى الصور ومقاطع الفيديو.</string>
+    <string name="file_management_permission_text">%1$s يحتاج إلى أذونات إدارة الملفات لرفع الملفات. يمكنك اختيار الوصول الكامل إلى جميع الملفات، أو الوصول للقراءة فقط إلى الصور ومقاطع الفيديو.</string>
     <string name="file_migration_checking_destination">جار التحقق من الوجهة…</string>
     <string name="file_migration_cleaning">تنظيف…</string>
     <string name="file_migration_dialog_title">يجري تحديث ملفات مجلد التخزين</string>

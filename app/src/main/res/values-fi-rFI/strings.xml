@@ -282,6 +282,7 @@
     <string name="etm_title">Kehittäjän testitila</string>
     <string name="etm_transfer">Tiedoston siirto</string>
     <string name="etm_transfer_enqueue_test_download">Jonota testilataus</string>
+    <string name="etm_transfer_enqueue_test_upload">Jonota testilähetys</string>
     <string name="etm_transfer_remote_path">Etäpolku</string>
     <string name="etm_transfer_type">Siirrä</string>
     <string name="etm_transfer_type_download">Lataa</string>
@@ -320,6 +321,7 @@
     <string name="file_management_permission">Käyttöoikeus tarvitaan</string>
     <string name="file_management_permission_optional">Tallennusoikeudet</string>
     <string name="file_management_permission_optional_text">%1$s toimii parhaiten, kun sille on myönnetty käyttöoikeus tallennustilan käyttöön. Voit myöntää täydet käyttöoikeudet tai vain luku-oikeudet kuviin ja videoihin.</string>
+    <string name="file_management_permission_text">%1$s tarvitsee käyttöoikeuden tallennustilan käyttöön tiedostojen lähettämiseksi. Voit myöntää täydet oikeudet kaikkiin tiedostoihin tai vain luku -oikeudet kuviin ja videoihin.</string>
     <string name="file_migration_checking_destination">Tarkistetaan kohdetta…</string>
     <string name="file_migration_cleaning">Siivotaan…</string>
     <string name="file_migration_dialog_title">Päivitetään tietojen tallennuspolkua</string>
@@ -404,6 +406,7 @@
     <string name="local_file_not_found_message">Tiedostoa ei löytynyt paikallisesta tiedostojärjestelmästä</string>
     <string name="local_folder_friendly_path">%1$s/%2$s</string>
     <string name="local_folder_list_empty">Kansioita ei ole enempää.</string>
+    <string name="locate_folder">Paikanna kansio</string>
     <string name="lock_expiration_info">Vanhenee: %1$s</string>
     <string name="lock_file">Lukitse tiedosto</string>
     <string name="locked_by">Lukinnut %1$s</string>
@@ -724,6 +727,7 @@ GNU yleinen lisenssi, versio 2</string>
     <string name="subject_shared_with_you">\"%1$s\" on jaettu kanssasi</string>
     <string name="subject_user_shared_with_you">%1$s jakoi kohteen \"%2$s\" kanssasi</string>
     <string name="subtitle_photos_only">Vain kuvat</string>
+    <string name="subtitle_photos_videos">Kuvat ja videot</string>
     <string name="subtitle_videos_only">Vain videot</string>
     <string name="suggest">Ehdota</string>
     <string name="sync_conflicts_in_favourites_ticker">Ristiriitoja löytynyt</string>
@@ -884,9 +888,21 @@ GNU yleinen lisenssi, versio 2</string>
         <item quantity="one">Ei onnistuttu kopioimaan %1$d tiedostoa %2$s kansioon</item>
         <item quantity="other">Ei onnistuttu kopioimaan %1$d tiedostoja %2$s kansioon</item>
     </plurals>
+    <plurals name="processed_n_entries">
+        <item quantity="one">Käsiteltiin %d kohde</item>
+        <item quantity="other">Käsiteltiin %d kohdetta</item>
+    </plurals>
     <plurals name="found_n_duplicates">
         <item quantity="one">Löytyi %d kaksoiskappale.</item>
         <item quantity="other">Löytyi %d kaksoiskappaletta.</item>
+    </plurals>
+    <plurals name="export_successful">
+        <item quantity="one">Vietiin %d tiedosto </item>
+        <item quantity="other">Vietiin %d tiedostoa</item>
+    </plurals>
+    <plurals name="export_failed">
+        <item quantity="one">%d tiedoston vienti epäonnistui</item>
+        <item quantity="other">%d tiedoston vienti epäonnistui</item>
     </plurals>
     <plurals name="file_list__footer__folder">
         <item quantity="one">%1$d kansio</item>
