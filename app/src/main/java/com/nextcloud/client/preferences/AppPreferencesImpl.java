@@ -730,7 +730,7 @@ public final class AppPreferencesImpl implements AppPreferences {
             .putString(PREF__WIDGET_ID + widgetId, widget.getId())
             .putString(PREF__WIDGET_TITLE + widgetId, widget.getTitle())
             .putString(PREF__WIDGET_ICON + widgetId, widget.getIconUrl())
-            .putBoolean(PREF__WIDGET_ROUND_ICON + widget, widget.getRoundIcons())
+            .putBoolean(PREF__WIDGET_ROUND_ICON + widgetId, widget.getRoundIcons())
             .putString(PREF__WIDGET_USER + widgetId, user.getAccountName());
 
 
