@@ -23,7 +23,6 @@
 package com.owncloud.android.ui.adapter
 
 import android.content.Context
-import android.graphics.Color
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.core.view.get
@@ -55,7 +54,6 @@ class GalleryRowHolder(
         // re-use existing ones
         while (binding.rowLayout.childCount < row.files.size) {
             val shimmer = LoaderImageView(context).apply {
-                setBackgroundColor(Color.RED)
                 setImageResource(R.drawable.background)
                 resetLoader()
                 invalidate()
