@@ -94,7 +94,7 @@ class OCFileListDelegate(
     }
 
     fun bindGalleryRowThumbnail(
-        shimmer: LoaderImageView,
+        shimmer: LoaderImageView?,
         imageView: ImageView,
         file: OCFile,
         galleryRowHolder: GalleryRowHolder,

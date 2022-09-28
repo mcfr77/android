@@ -23,6 +23,8 @@
 package com.owncloud.android.ui.adapter
 
 import android.content.Context
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.core.view.get
@@ -73,6 +75,19 @@ class GalleryRowHolder(
                 )
             }
 
+            val videoOverlay = ImageView(context).apply {
+                setImageResource(R.drawable.video_white)
+            }
+            videoOverlay.layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+
+            // val frameLayout = FrameLayout(context).apply { 
+            //     addView(imageView)
+            //     addView(videoOverlay)
+            // }
+
             LinearLayout(context).apply {
                 addView(shimmer)
                 addView(imageView)
@@ -103,7 +118,7 @@ class GalleryRowHolder(
                 val newHeight1 = height1 * scaleFactor1
                 val newWidth1 = width1 * scaleFactor1
 
-                file.setImageDimension(ImageDimension(newWidth1, newHeight1))
+                file.imageDimension = ImageDimension(newWidth1, newHeight1)
 
                 newSummedWidth += newWidth1
             }
@@ -143,7 +158,11 @@ class GalleryRowHolder(
             val linearLayout = binding.rowLayout[index] as LinearLayout
             val shimmer = linearLayout[0] as LoaderImageView
 
+            // val frameLayout = linearLayout[1] as FrameLayout
+            // val thumbnail = frameLayout[0] as ImageView
+
             val thumbnail = linearLayout[1] as ImageView
+
             thumbnail.adjustViewBounds = true
             thumbnail.scaleType = ImageView.ScaleType.CENTER
 

@@ -62,6 +62,7 @@ import com.owncloud.android.ui.adapter.DiskLruImageCache;
 import com.owncloud.android.ui.fragment.FileFragment;
 import com.owncloud.android.ui.preview.PreviewImageFragment;
 import com.owncloud.android.utils.BitmapUtils;
+import com.owncloud.android.utils.DisplayUtils;
 import com.owncloud.android.utils.DisplayUtils.AvatarGenerationListener;
 import com.owncloud.android.utils.FileStorageUtils;
 import com.owncloud.android.utils.MimeTypeUtil;
@@ -336,7 +337,7 @@ public final class ThumbnailsCacheManager {
                     }
 
                     if (MimeTypeUtil.isVideo(file)) {
-                        return ThumbnailsCacheManager.addVideoOverlay(thumbnail);
+                        return ThumbnailsCacheManager.addVideoOverlay(thumbnail, MainApp.getAppContext());
                     } else {
                         return thumbnail;
                     }
@@ -349,7 +350,7 @@ public final class ThumbnailsCacheManager {
                         newImage = true;
 
                         if (MimeTypeUtil.isVideo(file) && thumbnail != null) {
-                            thumbnail = addVideoOverlay(thumbnail);
+                            thumbnail = addVideoOverlay(thumbnail, MainApp.getAppContext());
                         }
 
                     } catch (OutOfMemoryError oome) {
@@ -450,7 +451,7 @@ public final class ThumbnailsCacheManager {
                 thumbnail = doResizedImageInBackground(file, storageManager);
 
                 if (MimeTypeUtil.isVideo(file) && thumbnail != null) {
-                    thumbnail = addVideoOverlay(thumbnail);
+                    thumbnail = addVideoOverlay(thumbnail, MainApp.getAppContext());
                 }
 
             } catch (OutOfMemoryError oome) {
@@ -602,7 +603,7 @@ public final class ThumbnailsCacheManager {
                     thumbnail = doThumbnailFromOCFileInBackground();
 
                     if (MimeTypeUtil.isVideo((ServerFileInterface) mFile) && thumbnail != null) {
-                        thumbnail = addVideoOverlay(thumbnail);
+                        thumbnail = addVideoOverlay(thumbnail, MainApp.getAppContext());
                     }
                 } else if (mFile instanceof File) {
                     thumbnail = doFileInBackground();
@@ -611,7 +612,7 @@ public final class ThumbnailsCacheManager {
                     String mMimeType = FileStorageUtils.getMimeTypeFromName(url);
 
                     if (MimeTypeUtil.isVideo(mMimeType) && thumbnail != null) {
-                        thumbnail = addVideoOverlay(thumbnail);
+                        thumbnail = addVideoOverlay(thumbnail, MainApp.getAppContext());
                     }
                     //} else {  do nothing
                 }
@@ -1203,22 +1204,20 @@ public final class ThumbnailsCacheManager {
         return null;
     }
 
-    public static Bitmap addVideoOverlay(Bitmap thumbnail) {
-        int playButtonWidth = (int) (thumbnail.getWidth() * 0.3);
-        int playButtonHeight = (int) (thumbnail.getHeight() * 0.3);
+    public static Bitmap addVideoOverlay(Bitmap thumbnail, Context context) {
+//        int minValue = Math.min(thumbnail.getWidth(), thumbnail.getHeight());
+//        int playButtonWidth = (int) (minValue * 0.2);
+//        int playButtonHeight = (int) (minValue * 0.2);
 
         Drawable playButtonDrawable = ResourcesCompat.getDrawable(MainApp.getAppContext().getResources(),
-                                                                  R.drawable.view_play,
+                                                                  R.drawable.video_white,
                                                                   null);
 
-        Bitmap playButton = BitmapUtils.drawableToBitmap(playButtonDrawable,
-                                                         playButtonWidth,
-                                                         playButtonHeight);
+        int px = DisplayUtils.convertDpToPixel(24f, context);
 
-        Bitmap resizedPlayButton = Bitmap.createScaledBitmap(playButton,
-                                                             playButtonWidth,
-                                                             playButtonHeight,
-                                                             true);
+        Bitmap playButton = BitmapUtils.drawableToBitmap(playButtonDrawable, px, px);
+
+        Bitmap resizedPlayButton = Bitmap.createScaledBitmap(playButton, px, px, true);
 
         Bitmap resultBitmap = Bitmap.createBitmap(thumbnail.getWidth(),
                                                   thumbnail.getHeight(),
@@ -1226,32 +1225,31 @@ public final class ThumbnailsCacheManager {
 
         Canvas c = new Canvas(resultBitmap);
 
-        // compute visual center of play button, according to resized image
-        int x1 = resizedPlayButton.getWidth();
-        int y1 = resizedPlayButton.getHeight() / 2;
-        int x2 = 0;
-        int y2 = resizedPlayButton.getWidth();
-        int x3 = 0;
-        int y3 = 0;
-
-        double ym = ( ((Math.pow(x3,2) - Math.pow(x1,2) + Math.pow(y3,2) - Math.pow(y1,2)) *
-                (x2 - x1)) - (Math.pow(x2,2) - Math.pow(x1,2) + Math.pow(y2,2) -
-                Math.pow(y1,2)) * (x3 - x1) )  /  (2 * ( ((y3 - y1) * (x2 - x1)) -
-                ((y2 - y1) * (x3 - x1)) ));
-        double xm = ( (Math.pow(x2,2) - Math.pow(x1,2)) + (Math.pow(y2,2) - Math.pow(y1,2)) -
-                (2*ym*(y2 - y1)) ) / (2*(x2 - x1));
-
-        // offset to top left
-        double ox = - xm;
-
+//        // compute visual center of play button, according to resized image
+//        int x1 = resizedPlayButton.getWidth();
+//        int y1 = resizedPlayButton.getHeight() / 2;
+//        int x2 = 0;
+//        int y2 = resizedPlayButton.getWidth();
+//        int x3 = 0;
+//        int y3 = 0;
+//
+//        double ym = ( ((Math.pow(x3,2) - Math.pow(x1,2) + Math.pow(y3,2) - Math.pow(y1,2)) *
+//                (x2 - x1)) - (Math.pow(x2,2) - Math.pow(x1,2) + Math.pow(y2,2) -
+//                Math.pow(y1,2)) * (x3 - x1) )  /  (2 * ( ((y3 - y1) * (x2 - x1)) -
+//                ((y2 - y1) * (x3 - x1)) ));
+//        double xm = ( (Math.pow(x2,2) - Math.pow(x1,2)) + (Math.pow(y2,2) - Math.pow(y1,2)) -
+//                (2*ym*(y2 - y1)) ) / (2*(x2 - x1));
+//
+//        // offset to top left
+//        double ox = - xm;
+//
 
         c.drawBitmap(thumbnail, 0, 0, null);
 
         Paint p = new Paint();
         p.setAlpha(230);
 
-        c.drawBitmap(resizedPlayButton, (float) ((thumbnail.getWidth() / 2) + ox),
-                (float) ((thumbnail.getHeight() / 2) - ym), p);
+        c.drawBitmap(resizedPlayButton, px, px, p);
 
         return resultBitmap;
     }

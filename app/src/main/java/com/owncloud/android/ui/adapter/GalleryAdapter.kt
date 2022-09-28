@@ -213,6 +213,8 @@ class GalleryAdapter(
 
     private fun transformToRows(list: List<OCFile>): List<GalleryRow> {
         return list
+            .sortedBy { it.modificationTimestamp }
+            .reversed()
             .chunked(columns)
             .map { entry -> GalleryRow(entry, defaultThumbnailSize, defaultThumbnailSize) }
     }

@@ -842,8 +842,17 @@ public final class DisplayUtils {
         }
     }
 
-    public static String getDateByPattern(long timestamp, Context context, String pattern) {
-        DateFormat df = new SimpleDateFormat(pattern, context.getResources().getConfiguration().locale);
+    public static String getDateByPattern(long timestamp, String pattern) {
+        return getDateByPattern(timestamp, null, pattern);
+    }
+
+    public static String getDateByPattern(long timestamp, @Nullable Context context, String pattern) {
+        DateFormat df;
+        if (context != null) {
+            df = new SimpleDateFormat(pattern, context.getResources().getConfiguration().locale);
+        } else {
+            df = new SimpleDateFormat(pattern);
+        }
         df.setTimeZone(TimeZone.getTimeZone(TimeZone.getDefault().getID()));
 
         return df.format(timestamp);
@@ -968,7 +977,7 @@ public final class DisplayUtils {
                     stopShimmer(shimmerThumbnail, thumbnailView);
 
                     if (MimeTypeUtil.isVideo(file)) {
-                        Bitmap withOverlay = ThumbnailsCacheManager.addVideoOverlay(thumbnail);
+                        Bitmap withOverlay = ThumbnailsCacheManager.addVideoOverlay(thumbnail, context);
                         thumbnailView.setImageBitmap(withOverlay);
                     } else {
                         if (gridView) {

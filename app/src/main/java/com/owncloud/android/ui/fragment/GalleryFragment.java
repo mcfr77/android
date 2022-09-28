@@ -117,12 +117,12 @@ public class GalleryFragment extends OCFileListFragment implements GalleryFragme
 
         remoteFile = fileDataStorageManager.getDefaultRootPath();
 
-        getRecyclerView().addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                loadMoreWhenEndReached(recyclerView, dy);
-            }
-        });
+//        getRecyclerView().addOnScrollListener(new RecyclerView.OnScrollListener() {
+//            @Override
+//            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+//                loadMoreWhenEndReached(recyclerView, dy);
+//            }
+//        });
 
         Log_OC.i(this, "onCreateView() in GalleryFragment end");
         return v;
@@ -268,7 +268,7 @@ public class GalleryFragment extends OCFileListFragment implements GalleryFragme
 
         startDate = endDate - (daySpan * 24 * 60 * 60);
 
-        runGallerySearchTask();
+        // runGallerySearchTask();
     }
 
     @Override
