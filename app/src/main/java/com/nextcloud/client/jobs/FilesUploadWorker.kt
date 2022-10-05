@@ -163,7 +163,7 @@ class FilesUploadWorker(
             // cancel notification
             notificationManager.cancel(FOREGROUND_SERVICE_ID)
 
-            /// TODO notify result
+            // TODO notify result
             // notifyUploadResult(mCurrentUpload, uploadResult)
             // sendBroadcastUploadFinished(mCurrentUpload, uploadResult, removeResult.second)
         }
@@ -192,7 +192,7 @@ class FilesUploadWorker(
             notificationBuilder.setChannelId(NotificationUtils.NOTIFICATION_CHANNEL_UPLOAD)
         }
 
-        /// includes a pending intent in the notification showing the details
+        // includes a pending intent in the notification showing the details
         val intent = UploadListActivity.createIntent(
             uploadFileOperation.file,
             uploadFileOperation.user,

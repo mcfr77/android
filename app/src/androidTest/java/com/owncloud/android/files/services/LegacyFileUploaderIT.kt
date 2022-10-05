@@ -22,4 +22,4 @@
 
 package com.owncloud.android.files.services
 
-class LegacyFileUploaderIT : FileUploaderIT() 
+class LegacyFileUploaderIT : FileUploaderIT()
