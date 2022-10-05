@@ -24,6 +24,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.res.Resources
 import android.os.Build
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.work.WorkerParameters
 import com.nextcloud.client.account.UserAccountManager
 import com.nextcloud.client.core.Clock
@@ -110,6 +111,9 @@ class BackgroundJobFactoryTest {
     @Mock
     private lateinit var themeButtonUtils: ThemeButtonUtils
 
+    @Mock
+    private lateinit var localBroadcastManager: LocalBroadcastManager
+
     private lateinit var factory: BackgroundJobFactory
 
     @Before
@@ -133,7 +137,8 @@ class BackgroundJobFactoryTest {
             deckApi,
             themeColorUtils,
             themeSnackbarUtils,
-            themeButtonUtils
+            themeButtonUtils,
+            { localBroadcastManager }
         )
     }
 
